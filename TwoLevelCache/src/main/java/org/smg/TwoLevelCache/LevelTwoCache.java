@@ -22,7 +22,7 @@ public class LevelTwoCache {
 	
 	public void put(String key, Object o) throws InvalidObjectException {
 		 try {
-			System.out.println("L2Cache : Adding " + key);
+			//System.out.println("L2Cache : Adding " + key);
 			byte [] byteArray = builder.build(o);
 			map.put(key, byteArray);
 		} catch (IOException e) {
@@ -31,4 +31,7 @@ public class LevelTwoCache {
 		
 	}
 	
+	public int size() {
+		return map.size();
+	}
 } 

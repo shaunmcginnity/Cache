@@ -16,10 +16,9 @@ public class LevelOneCache extends LinkedHashMap<String, Object> {
 	@Override
 	protected boolean removeEldestEntry(
 			java.util.Map.Entry<String, Object> eldest) {
-		// TODO Auto-generated method stub
-		System.out.println("L1Cache : removeOldestEntry " + eldest.getKey());
+		//System.out.println("L1Cache : removeOldestEntry " + eldest.getKey());
 		if(super.size() > numEntries) {
-			System.out.println("L1Cache : Evicting " + eldest.getKey());
+			//System.out.println("L1Cache : Evicting " + eldest.getKey());
 			try {
 				l2Cache.put(eldest.getKey(), eldest.getValue());
 			} catch (InvalidObjectException e) {
