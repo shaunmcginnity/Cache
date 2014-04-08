@@ -8,11 +8,13 @@ public class LevelOneCache extends LinkedHashMap<String, Object> {
 	public enum EvictionOrder { ACCESS, INSERTION };
 	private final LevelTwoCache l2Cache;
 	private int numEntries;
+	
 	public LevelOneCache(int numEntries, LevelTwoCache l2Cache, EvictionOrder e) {
 		super(numEntries, 0.75f, EvictionOrder.ACCESS == e);
 		this.l2Cache = l2Cache;
 		this.numEntries = numEntries;
 	}
+	
 	@Override
 	protected boolean removeEldestEntry(
 			java.util.Map.Entry<String, Object> eldest) {
@@ -28,6 +30,21 @@ public class LevelOneCache extends LinkedHashMap<String, Object> {
 			return true;
 		}
 		return false;
+	}
+	
+	@Override
+	public Object remove(Object key) {
+		Object value = super.remove(key);
+		if(null == value) {
+			return l2Cache.remove(key);
+		}
+		return value;
+	}
+
+	@Override
+	public Object put(String key, Object value) {
+		l2Cache.remove(key);
+		return super.put(key, value);
 	}
 
 }
