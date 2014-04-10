@@ -1,9 +1,11 @@
 package org.smg.TwoLevelCache;
 
+import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.math.stat.descriptive.moment.Mean;
 import org.smg.TwoLevelCache.LevelOneCache.EvictionOrder;
 
 /**
@@ -12,34 +14,42 @@ import org.smg.TwoLevelCache.LevelOneCache.EvictionOrder;
  */
 public class SessionModeller 
 {
-	private static final LevelTwoCache l2Cache = new LevelTwoCache ();
+	private static final LevelTwoCache l2Cache = new InMemoryLevelTwoCache ();
 	private static final LevelOneCache cache = new LevelOneCache (10000, l2Cache, EvictionOrder.ACCESS);
-	
+	private static final Mean startMean = new Mean();
+	private static final Mean stopMean = new Mean();
+	private static final Mean sessionAge = new Mean();
 	private static final class SessionStop implements Runnable {
-		private Session session;
+		private String sessionId;
 
-		public SessionStop(Session session) {
-			this.session = session;
+		public SessionStop(String id) {
+			this.sessionId = id;
 		}
 
 		@Override
 		public void run() {
 			//System.out.println("STOP " + session.getId());
-			SessionModeller.cache.remove(Long.toString(session.getId()));
+			long now = System.currentTimeMillis();
+			Session session = (Session)SessionModeller.cache.remove(sessionId);
+			sessionAge.increment(session.getAge());
+			stopMean.increment(System.currentTimeMillis() - now);
 		}
 	}
 
 	private static final class DataStart implements Runnable {
-		private final Session session;
+		private final String sessionId;
+		private final HashMap<String, Object> attributes;
 
-		public DataStart(Session session) {
-			this.session = session;
+		public DataStart(String sessionId, HashMap<String, Object> attributes) {
+			this.sessionId = sessionId;
+			this.attributes = attributes;
 		}
 
 		@Override
 		public void run() {
 			//System.out.println("DATA_START " + session.getId());
-			SessionModeller.cache.get(Long.toString(session.getId()));
+			Session cachedSession = (Session)SessionModeller.cache.get(sessionId);
+			cachedSession.putAll(attributes);
 		}
 	}
     private static final class SessionInitiator implements Runnable {
@@ -55,13 +65,30 @@ public class SessionModeller
 		@Override
 		public void run() {
 			Session s = new Session(r.nextLong());
+			addInitialSessionAttributes(s);
 			//System.out.println("START " + s.getId());
+			long now = System.currentTimeMillis();
 			SessionModeller.cache.put(Long.toString(s.getId()), s);
-			
+			long delta = System.currentTimeMillis() - now;
+			startMean.increment(delta);
 			if(r.nextInt(100) < 70) {
-				e.schedule(new DataStart(s), r.nextInt(10) + 5, TimeUnit.MILLISECONDS);
+				e.schedule(new DataStart(Long.toString(s.getId()), dataStartAttributes()), 5, TimeUnit.MILLISECONDS);
 			}
-			e.schedule(new SessionStop(s), r.nextInt(10)+25, TimeUnit.SECONDS);
+			e.schedule(new SessionStop(Long.toString(s.getId())), 25, TimeUnit.SECONDS);
+		}
+
+		private HashMap<String,Object> dataStartAttributes() {
+			HashMap<String, Object> attributes = new HashMap<String, Object>();
+			for(int i=0; i<10; i++) {
+				attributes.put("dataStartAttr" + i, r.nextInt() + "value");
+			}
+			return attributes;
+		}
+
+		private void addInitialSessionAttributes(Session s) {
+			for(int i=0; i<10; i++) {
+				s.put("initAttr" + i, r.nextInt() + "value");
+			}			
 		}
 	}
 
@@ -69,15 +96,19 @@ public class SessionModeller
     {
         final ScheduledThreadPoolExecutor e = new ScheduledThreadPoolExecutor(1);
         final Random r = new Random();
-        e.scheduleAtFixedRate(new SessionInitiator(e, r), 0, 100, TimeUnit.MICROSECONDS);
+        e.scheduleAtFixedRate(new SessionInitiator(e, r), 0, 200, TimeUnit.MICROSECONDS);
 
         e.scheduleAtFixedRate(new Runnable() {
 
 			@Override
 			public void run() {
-				System.out.println("SIZE : " + cache.size() + " " + l2Cache.size());
+				System.out.println("SIZE : " + cache.size() + " " + l2Cache.size() + " " + e.getTaskCount());
+				System.out.println(startMean.getResult() + " " + stopMean.getResult() + " " + sessionAge.getResult());
+				startMean.clear();
+				stopMean.clear();
+				sessionAge.clear();
 			}
         	
-        }, 0, 1000, TimeUnit.MILLISECONDS);
+        }, 0, 10000, TimeUnit.MILLISECONDS);
 }
 }

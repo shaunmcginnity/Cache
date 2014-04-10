@@ -43,8 +43,22 @@ public class LevelOneCache extends LinkedHashMap<String, Object> {
 
 	@Override
 	public Object put(String key, Object value) {
-		l2Cache.remove(key);
+		l2Cache.removeBeforePut(key);
 		return super.put(key, value);
 	}
 
+	@Override
+	public Object get(Object key) {
+		if(this.containsKey(key)) {
+			return super.get(key);
+		}
+		Object o = l2Cache.remove(key);
+		if(null != o) {
+			super.put((String)key, o);
+			return o;
+		}
+		return null;
+	}
+	
+	
 }

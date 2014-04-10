@@ -9,7 +9,7 @@ public class LevelOneCacheTest {
 
 	@Test
 	public void testStoresEvictedEntriesInLevelTwoCache() {
-		LevelTwoCache l2Cache = new LevelTwoCache();
+		LevelTwoCache l2Cache = new InMemoryLevelTwoCache();
 		LevelOneCache l1Cache = new LevelOneCache(5, l2Cache, EvictionOrder.ACCESS);
 		
 		for(int i=0; i<5; i++) {
@@ -23,7 +23,7 @@ public class LevelOneCacheTest {
 
 	@Test
 	public void testLeastRecentlyUsedEntryIsEvictedFirstToLevelTwoCache() {
-		LevelTwoCache l2Cache = new LevelTwoCache();
+		LevelTwoCache l2Cache = new InMemoryLevelTwoCache();
 		LevelOneCache l1Cache = new LevelOneCache(5, l2Cache, EvictionOrder.ACCESS);
 		
 		for(int i=0; i<5; i++) {
@@ -38,7 +38,7 @@ public class LevelOneCacheTest {
 
 	@Test
 	public void testRemovingAnItemIsAlsoRemovedFromLevelTwoCache() {
-		LevelTwoCache l2Cache = new LevelTwoCache();
+		LevelTwoCache l2Cache = new InMemoryLevelTwoCache();
 		LevelOneCache l1Cache = new LevelOneCache(5, l2Cache, EvictionOrder.ACCESS);
 		
 		for(int i=0; i<5; i++) {
@@ -54,7 +54,7 @@ public class LevelOneCacheTest {
 
 	@Test
 	public void testUpdatingAnEvictedItemRemovesItFromLevelTwoCache() {
-		LevelTwoCache l2Cache = new LevelTwoCache();
+		LevelTwoCache l2Cache = new InMemoryLevelTwoCache();
 		LevelOneCache l1Cache = new LevelOneCache(5, l2Cache, EvictionOrder.ACCESS);
 		
 		for(int i=0; i<5; i++) {

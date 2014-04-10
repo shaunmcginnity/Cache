@@ -10,7 +10,7 @@ import org.junit.Test;
 public class LevelTwoCacheTest {
 	@Test
 	public void addingAnObjectWriteSerializedObjectToMap() throws InvalidObjectException {
-		LevelTwoCache l2cache = new LevelTwoCache();
+		LevelTwoCache l2cache = new InMemoryLevelTwoCache();
 		
 		HashMap<String,String> map = new HashMap<> ();
 		map.put("a", "v");
