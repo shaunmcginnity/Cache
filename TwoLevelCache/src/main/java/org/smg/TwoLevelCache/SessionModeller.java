@@ -8,17 +8,16 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.math.stat.descriptive.moment.Mean;
 import org.smg.TwoLevelCache.LevelOneCache.EvictionOrder;
 
-/**
- * Hello world!
- *
- */
 public class SessionModeller 
 {
-	private static final LevelTwoCache l2Cache = new InMemoryLevelTwoCache ();
-	private static final LevelOneCache cache = new LevelOneCache (10000, l2Cache, EvictionOrder.ACCESS);
+	private static final LevelTwoCacheEntryBuilder<Session> l2Builder = new DefaultSerializingLevelTwoCacheEntryBuilder();
+	private static final LevelTwoCache<Session> l2Cache = new InMemoryLevelTwoCache<>(l2Builder);
+	private static final LevelOneCache<Session> cache = new LevelOneCache<>(10000, l2Cache, EvictionOrder.ACCESS);
 	private static final Mean startMean = new Mean();
 	private static final Mean stopMean = new Mean();
 	private static final Mean sessionAge = new Mean();
+	private static final int sAVERAGE_SESSION_DURATION = 120;
+	
 	private static final class SessionStop implements Runnable {
 		private String sessionId;
 
@@ -30,9 +29,15 @@ public class SessionModeller
 		public void run() {
 			//System.out.println("STOP " + session.getId());
 			long now = System.currentTimeMillis();
-			Session session = (Session)SessionModeller.cache.remove(sessionId);
-			sessionAge.increment(session.getAge());
-			stopMean.increment(System.currentTimeMillis() - now);
+			Session session;
+			try {
+				session = (Session)SessionModeller.cache.remove(sessionId);
+				sessionAge.increment(session.getAge());
+				stopMean.increment(System.currentTimeMillis() - now);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -64,7 +69,7 @@ public class SessionModeller
 
 		@Override
 		public void run() {
-			Session s = new Session(r.nextLong());
+			Session s = new Session(r.nextLong(), System.currentTimeMillis());
 			addInitialSessionAttributes(s);
 			//System.out.println("START " + s.getId());
 			long now = System.currentTimeMillis();
@@ -74,7 +79,7 @@ public class SessionModeller
 			if(r.nextInt(100) < 70) {
 				e.schedule(new DataStart(Long.toString(s.getId()), dataStartAttributes()), 5, TimeUnit.MILLISECONDS);
 			}
-			e.schedule(new SessionStop(Long.toString(s.getId())), 25, TimeUnit.SECONDS);
+			e.schedule(new SessionStop(Long.toString(s.getId())), sAVERAGE_SESSION_DURATION, TimeUnit.SECONDS);
 		}
 
 		private HashMap<String,Object> dataStartAttributes() {
@@ -96,7 +101,7 @@ public class SessionModeller
     {
         final ScheduledThreadPoolExecutor e = new ScheduledThreadPoolExecutor(1);
         final Random r = new Random();
-        e.scheduleAtFixedRate(new SessionInitiator(e, r), 0, 200, TimeUnit.MICROSECONDS);
+        e.scheduleAtFixedRate(new SessionInitiator(e, r), 0, 400, TimeUnit.MICROSECONDS);
 
         e.scheduleAtFixedRate(new Runnable() {
 

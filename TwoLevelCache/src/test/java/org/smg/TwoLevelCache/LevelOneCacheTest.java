@@ -9,8 +9,9 @@ public class LevelOneCacheTest {
 
 	@Test
 	public void testStoresEvictedEntriesInLevelTwoCache() {
-		LevelTwoCache l2Cache = new InMemoryLevelTwoCache();
-		LevelOneCache l1Cache = new LevelOneCache(5, l2Cache, EvictionOrder.ACCESS);
+		DefaultSerializingLevelTwoCacheEntryBuilder<String> levelTwoBuilder = new DefaultSerializingLevelTwoCacheEntryBuilder<>();
+		LevelTwoCache<String> l2Cache = new InMemoryLevelTwoCache<>(levelTwoBuilder);
+		LevelOneCache<String> l1Cache = new LevelOneCache<>(5, l2Cache, EvictionOrder.ACCESS);
 		
 		for(int i=0; i<5; i++) {
 			l1Cache.put(Integer.toString(i), Integer.toString(i*i));
@@ -23,8 +24,9 @@ public class LevelOneCacheTest {
 
 	@Test
 	public void testLeastRecentlyUsedEntryIsEvictedFirstToLevelTwoCache() {
-		LevelTwoCache l2Cache = new InMemoryLevelTwoCache();
-		LevelOneCache l1Cache = new LevelOneCache(5, l2Cache, EvictionOrder.ACCESS);
+		DefaultSerializingLevelTwoCacheEntryBuilder<String> levelTwoBuilder = new DefaultSerializingLevelTwoCacheEntryBuilder<>();
+		LevelTwoCache<String> l2Cache = new InMemoryLevelTwoCache<>(levelTwoBuilder);
+		LevelOneCache<String> l1Cache = new LevelOneCache<>(5, l2Cache, EvictionOrder.ACCESS);
 		
 		for(int i=0; i<5; i++) {
 			l1Cache.put(Integer.toString(i), Integer.toString(i*i));
@@ -38,9 +40,10 @@ public class LevelOneCacheTest {
 
 	@Test
 	public void testRemovingAnItemIsAlsoRemovedFromLevelTwoCache() {
-		LevelTwoCache l2Cache = new InMemoryLevelTwoCache();
-		LevelOneCache l1Cache = new LevelOneCache(5, l2Cache, EvictionOrder.ACCESS);
-		
+		DefaultSerializingLevelTwoCacheEntryBuilder<String> levelTwoBuilder = new DefaultSerializingLevelTwoCacheEntryBuilder<>();
+		LevelTwoCache<String> l2Cache = new InMemoryLevelTwoCache<>(levelTwoBuilder);
+		LevelOneCache<String> l1Cache = new LevelOneCache<>(5, l2Cache, EvictionOrder.ACCESS);
+
 		for(int i=0; i<5; i++) {
 			l1Cache.put(Integer.toString(i), Integer.toString(i*i));
 		}
@@ -54,8 +57,9 @@ public class LevelOneCacheTest {
 
 	@Test
 	public void testUpdatingAnEvictedItemRemovesItFromLevelTwoCache() {
-		LevelTwoCache l2Cache = new InMemoryLevelTwoCache();
-		LevelOneCache l1Cache = new LevelOneCache(5, l2Cache, EvictionOrder.ACCESS);
+		DefaultSerializingLevelTwoCacheEntryBuilder<String> levelTwoBuilder = new DefaultSerializingLevelTwoCacheEntryBuilder<>();
+		LevelTwoCache<String> l2Cache = new InMemoryLevelTwoCache<>(levelTwoBuilder);
+		LevelOneCache<String> l1Cache = new LevelOneCache<>(5, l2Cache, EvictionOrder.ACCESS);
 		
 		for(int i=0; i<5; i++) {
 			l1Cache.put(Integer.toString(i), Integer.toString(i*i));

@@ -2,16 +2,16 @@ package org.smg.TwoLevelCache;
 
 import java.io.InvalidObjectException;
 
-public interface LevelTwoCache {
+public interface LevelTwoCache<T> {
 
-	public abstract Object get(String key);
+	public abstract T get(String key);
 
-	public abstract void put(String key, Object o)
+	public abstract void put(String key, T o)
 			throws InvalidObjectException;
 
 	public abstract int size();
 
-	public abstract Object remove(Object key);
+	public abstract T remove(String key);
 
 	public abstract void removeBeforePut(String key);
 

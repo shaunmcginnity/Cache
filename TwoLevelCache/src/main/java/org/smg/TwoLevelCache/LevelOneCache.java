@@ -4,12 +4,12 @@ import java.io.InvalidObjectException;
 import java.util.LinkedHashMap;
 
 @SuppressWarnings("serial")
-public class LevelOneCache extends LinkedHashMap<String, Object> {
+public class LevelOneCache<T> extends LinkedHashMap<String, T> {
 	public enum EvictionOrder { ACCESS, INSERTION };
-	private final LevelTwoCache l2Cache;
+	private final LevelTwoCache<T> l2Cache;
 	private int numEntries;
 	
-	public LevelOneCache(int numEntries, LevelTwoCache l2Cache, EvictionOrder e) {
+	public LevelOneCache(int numEntries, LevelTwoCache<T> l2Cache, EvictionOrder e) {
 		super(numEntries, 0.75f, EvictionOrder.ACCESS == e);
 		this.l2Cache = l2Cache;
 		this.numEntries = numEntries;
@@ -17,7 +17,7 @@ public class LevelOneCache extends LinkedHashMap<String, Object> {
 	
 	@Override
 	protected boolean removeEldestEntry(
-			java.util.Map.Entry<String, Object> eldest) {
+			java.util.Map.Entry<String, T> eldest) {
 		//System.out.println("L1Cache : removeOldestEntry " + eldest.getKey());
 		if(super.size() > numEntries) {
 			//System.out.println("L1Cache : Evicting " + eldest.getKey());
@@ -33,26 +33,26 @@ public class LevelOneCache extends LinkedHashMap<String, Object> {
 	}
 	
 	@Override
-	public Object remove(Object key) {
-		Object value = super.remove(key);
+	public T remove(Object key) {
+		T value = super.remove(key);
 		if(null == value) {
-			return l2Cache.remove(key);
+			return l2Cache.remove((String)key);
 		}
 		return value;
 	}
 
 	@Override
-	public Object put(String key, Object value) {
+	public T put(String key, T value) {
 		l2Cache.removeBeforePut(key);
 		return super.put(key, value);
 	}
 
 	@Override
-	public Object get(Object key) {
+	public T get(Object key) {
 		if(this.containsKey(key)) {
 			return super.get(key);
 		}
-		Object o = l2Cache.remove(key);
+		T o = l2Cache.remove((String)key);
 		if(null != o) {
 			super.put((String)key, o);
 			return o;

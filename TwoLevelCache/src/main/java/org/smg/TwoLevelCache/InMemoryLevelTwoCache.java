@@ -4,14 +4,19 @@ import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.util.HashMap;
 
-public class InMemoryLevelTwoCache implements LevelTwoCache {
+public class InMemoryLevelTwoCache<T> implements LevelTwoCache<T> {
 	private final HashMap<String, byte[]> map = new HashMap<> ();
-	private final LevelTwoCacheEntryBuilder builder = new LevelTwoCacheEntryBuilder();
+	private final LevelTwoCacheEntryBuilder<T> builder;
+	
+	InMemoryLevelTwoCache(LevelTwoCacheEntryBuilder<T> builder) {
+		this.builder = builder;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.smg.TwoLevelCache.LevelTwoCache#get(java.lang.String)
 	 */
 	@Override
-	public Object get(String key) {
+	public T get(String key) {
 		byte [] byteArray = map.get(key);
 		if(null != byteArray) {
 			return extract(byteArray);
@@ -19,7 +24,7 @@ public class InMemoryLevelTwoCache implements LevelTwoCache {
 		return null;
 	}
 
-	private Object extract(byte[] byteArray) {
+	private T extract(byte[] byteArray) {
 		try {
 			return builder.retrieve(byteArray);
 		} catch (ClassNotFoundException | IOException e) {
@@ -33,12 +38,13 @@ public class InMemoryLevelTwoCache implements LevelTwoCache {
 	 * @see org.smg.TwoLevelCache.LevelTwoCache#put(java.lang.String, java.lang.Object)
 	 */
 	@Override
-	public void put(String key, Object o) throws InvalidObjectException {
+	public void put(String key, T o) throws InvalidObjectException {
 		 try {
-			//System.out.println("L2Cache : Adding " + key);
 			byte [] byteArray = builder.build(o);
+			//System.out.println("L2Cache : Adding " + key + " " + byteArray.length);
 			map.put(key, byteArray);
 		} catch (IOException e) {
+			System.out.println("L2Cache : Error " + e.getMessage());
 			throw new InvalidObjectException(e.getMessage()); // TODO
 		}
 		
@@ -56,7 +62,7 @@ public class InMemoryLevelTwoCache implements LevelTwoCache {
 	 * @see org.smg.TwoLevelCache.LevelTwoCache#remove(java.lang.Object)
 	 */
 	@Override
-	public Object remove(Object key) {
+	public T remove(String key) {
 		//System.out.println("L2Cache : Removing " + key);
 		byte[] byteArray = map.remove(key);
 		if(null != byteArray) {
