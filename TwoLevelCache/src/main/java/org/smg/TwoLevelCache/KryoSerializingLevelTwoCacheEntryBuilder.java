@@ -10,10 +10,14 @@ import com.esotericsoftware.kryo.io.Output;
 
 public class KryoSerializingLevelTwoCacheEntryBuilder<T> implements
 		LevelTwoCacheEntryBuilder<T> {
+	Kryo kyro = new Kryo();
 
+	public KryoSerializingLevelTwoCacheEntryBuilder() {
+		kyro.setReferences(false);
+	}
+	
 	@Override
 	public byte[] build(T o) throws IOException {
-		Kryo kyro = new Kryo();
 		ByteArrayOutputStream bOs = new ByteArrayOutputStream();
 		Output output = new Output(bOs);
 		kyro.writeClassAndObject(output, o);
@@ -25,7 +29,6 @@ public class KryoSerializingLevelTwoCacheEntryBuilder<T> implements
 	@Override
 	public T retrieve(byte[] byteArray) throws IOException,
 			ClassNotFoundException {
-		Kryo kyro = new Kryo();
 		ByteArrayInputStream bIs = new ByteArrayInputStream(byteArray);
 		
 		Input input = new Input(bIs);

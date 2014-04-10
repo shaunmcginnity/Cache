@@ -13,6 +13,7 @@ public class KryoSerializingSessionEntryBuilder2 implements LevelTwoCacheEntryBu
 	Kryo kyro = new Kryo();
 	public KryoSerializingSessionEntryBuilder2() {
 		kyro.register(Session.class);
+		kyro.setReferences(false);
 	}
 	@Override
 	public byte[] build(Session o) throws IOException {
