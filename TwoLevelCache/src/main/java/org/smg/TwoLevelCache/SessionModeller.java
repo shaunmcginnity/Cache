@@ -10,7 +10,7 @@ import org.smg.TwoLevelCache.LevelOneCache.EvictionOrder;
 
 public class SessionModeller 
 {
-	private static final LevelTwoCacheEntryBuilder<Session> l2Builder = new DefaultSerializingLevelTwoCacheEntryBuilder();
+	private static final LevelTwoCacheEntryBuilder<Session> l2Builder = new DefaultSerializingSessionEntryBuilder();
 	private static final LevelTwoCache<Session> l2Cache = new InMemoryLevelTwoCache<>(l2Builder);
 	private static final LevelOneCache<Session> cache = new LevelOneCache<>(10000, l2Cache, EvictionOrder.ACCESS);
 	private static final Mean startMean = new Mean();
