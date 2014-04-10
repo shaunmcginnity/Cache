@@ -42,7 +42,7 @@ public class LevelTwoCacheTest {
 	
 	@Test
 	public void testSessionSerialization() throws IOException, ClassNotFoundException {
-		KryoSerializingLevelTwoCacheEntryBuilder levelTwoBuilder = new KryoSerializingLevelTwoCacheEntryBuilder();
+		KryoSerializingLevelTwoCacheEntryBuilder<Session> levelTwoBuilder = new KryoSerializingLevelTwoCacheEntryBuilder<>();
 		
 		Session session = new Session(123456l, 1000l);
 		session.put("a", "b");
@@ -53,7 +53,7 @@ public class LevelTwoCacheTest {
 		
 		Session retrieved = levelTwoBuilder.retrieve(serialized);
 		
-		Assert.assertEquals("b", session.get("a"));
+		Assert.assertEquals("b", retrieved.get("a"));
 		Assert.assertEquals(123456, retrieved.getId());
 	}
 
