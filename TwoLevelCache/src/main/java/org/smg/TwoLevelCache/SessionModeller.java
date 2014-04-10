@@ -11,12 +11,12 @@ import org.smg.TwoLevelCache.LevelOneCache.EvictionOrder;
 public class SessionModeller 
 {
 	private static final LevelTwoCacheEntryBuilder<Session> l2Builder = new KryoSerializingSessionEntryBuilder2();
-	private static final LevelTwoCache<Session> l2Cache = new InMemoryLevelTwoCache<>(l2Builder);
+	private static final LevelTwoCache<Session> l2Cache = new DirectMemoryLevelTwoCache<>(l2Builder);
 	private static final LevelOneCache<Session> cache = new LevelOneCache<>(50000, l2Cache, EvictionOrder.ACCESS);
 	private static final Mean startMean = new Mean();
 	private static final Mean stopMean = new Mean();
 	private static final Mean sessionAge = new Mean();
-	private static final int sAVERAGE_SESSION_DURATION = 300;
+	private static final int sAVERAGE_SESSION_DURATION = 30;
 	
 	private static final class SessionStop implements Runnable {
 		private String sessionId;
