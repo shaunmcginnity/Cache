@@ -10,16 +10,23 @@ public class DirectMemoryLevelTwoCache<T> implements LevelTwoCache<T> {
 
 	private CacheService<String, byte[]> cacheService;
 	private LevelTwoCacheEntryBuilder<T> builder;
-
+	private int count = 0;
+	
 	DirectMemoryLevelTwoCache(LevelTwoCacheEntryBuilder<T> builder) {
 		this.builder = builder;
-		  this.cacheService = new DirectMemory<String, byte[]>()
-				    .setNumberOfBuffers( 10 )
-				    .setSize( 1000 )
-				    .setDisposalTime(10000000)
-				    .setInitialCapacity( 100000 )
-				    .setConcurrencyLevel( 4 )
-				    .newCacheService();
+		  try {
+			this.cacheService = new DirectMemory<String, byte[]>()
+					    .setNumberOfBuffers( 1000 )
+					    .setSize( 1000000 )
+					    .setDisposalTime(10000000)
+					    .setInitialCapacity( 100000 )
+					    .setConcurrencyLevel( 4 )
+					    .newCacheService();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 	
 	@Override
@@ -42,7 +49,8 @@ public class DirectMemoryLevelTwoCache<T> implements LevelTwoCache<T> {
 		try {
 			byteArray = builder.build(o);
 			if(null == cacheService.putByteArray(key, byteArray)) {
-				System.err.println("ERROR");
+				System.err.println("ERROR : " + count);
+				System.exit(1);
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
