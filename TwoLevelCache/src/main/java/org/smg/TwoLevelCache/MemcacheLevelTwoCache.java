@@ -21,18 +21,23 @@ public class MemcacheLevelTwoCache<T> implements LevelTwoCache<T> {
 		try {
 			c = new MemcachedClient(
 					new BinaryConnectionFactory(),
-			        AddrUtil.getAddresses("10.20.50.164:11211"));
+					AddrUtil.getAddresses("127.0.0.1:11211"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			c = null;
 		}
 
-			c.set("someKey", 3600, "Hello");
+		try {
+			c.set("someKey", 3600, "Hello").get();
 			// Retrieve a value (synchronously).
 			Object myObject=c.get("someKey");
 			System.out.println("Got " + (String)myObject);
+		} catch (InterruptedException | ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+	}
 	
 	@Override
 	public T get(String key) {
