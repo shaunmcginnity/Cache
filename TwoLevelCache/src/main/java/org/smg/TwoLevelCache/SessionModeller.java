@@ -20,7 +20,7 @@ class LevelTwoCacheBuilder {
 		case 4:
 			return new MapDBLevelTwoCache<>(builder);
 		default:
-			return new SimpleLevelTwoCache<>();
+			return new NotCompressingLevelTwoCache<>();
 		}
 	}
 }

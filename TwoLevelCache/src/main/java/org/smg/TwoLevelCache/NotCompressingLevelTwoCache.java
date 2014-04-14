@@ -4,7 +4,7 @@ import java.io.InvalidObjectException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SimpleLevelTwoCache<T> implements LevelTwoCache<T>{
+public class NotCompressingLevelTwoCache<T> implements LevelTwoCache<T>{
 
 	private Map<String, T> map = new HashMap<> ();
 	
