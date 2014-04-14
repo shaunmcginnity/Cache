@@ -2,13 +2,12 @@ package org.smg.TwoLevelCache;
 
 import java.io.IOException;
 import java.io.InvalidObjectException;
-import java.net.InetSocketAddress;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutionException;
 
 import net.spy.memcached.AddrUtil;
 import net.spy.memcached.BinaryConnectionFactory;
 import net.spy.memcached.MemcachedClient;
-import net.spy.memcached.internal.OperationCompletionListener;
 import net.spy.memcached.internal.OperationFuture;
 
 public class MemcacheLevelTwoCache<T> implements LevelTwoCache<T> {
@@ -56,10 +55,14 @@ public class MemcacheLevelTwoCache<T> implements LevelTwoCache<T> {
 	@Override
 	public void put(String key, T o) throws InvalidObjectException {
 		try {
-			c.set(key, 0, builder.build(o));
-			index.add(key);
-			size++;
-		} catch (IOException e) {
+			OperationFuture<Boolean> set = c.set(key, 0, builder.build(o));
+			// Make put synchronous
+			Boolean status = set.get();
+			if(status) {
+				index.add(key);
+				size++;
+			}
+		} catch (IOException | InterruptedException | ExecutionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new InvalidObjectException(e.getMessage());
