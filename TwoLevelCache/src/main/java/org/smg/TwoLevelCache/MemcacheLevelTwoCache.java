@@ -48,6 +48,8 @@ public class MemcacheLevelTwoCache<T> implements LevelTwoCache<T> {
 				e.printStackTrace();
 				return null;
 			}
+		} else {
+			System.err.println("MemcacheLevelTwoCache : index error : get of " + key + " returned null");
 		}
 		return null;
 	}
@@ -55,12 +57,14 @@ public class MemcacheLevelTwoCache<T> implements LevelTwoCache<T> {
 	@Override
 	public void put(String key, T o) throws InvalidObjectException {
 		try {
-			OperationFuture<Boolean> set = c.set(key, 0, builder.build(o));
+			OperationFuture<Boolean> set = c.set(key, 2592000, builder.build(o));
 			// Make put synchronous
 			Boolean status = set.get();
 			if(status) {
 				index.add(key);
 				size++;
+			} else {
+				System.out.println("Problem adding session for " + key);
 			}
 		} catch (IOException | InterruptedException | ExecutionException e) {
 			// TODO Auto-generated catch block
@@ -84,7 +88,11 @@ public class MemcacheLevelTwoCache<T> implements LevelTwoCache<T> {
 		try {
 			object = get(key);
 			// TODO - return removed object
-			c.delete(key);
+			if(null == object) {
+				System.err.println("MemcacheLevelTwoCache : cannot remove " + key);
+			}
+			Boolean removed = c.delete(key).get();
+			//System.out.println("Removed : " + key + " " + removed);
 			index.remove(key);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

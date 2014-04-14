@@ -62,8 +62,12 @@ public class SessionModeller
 			Session session;
 			try {
 				session = (Session)sessionModeller.cache.remove(sessionId);
-				sessionAge.increment(session.getAge());
-				stopMean.increment(System.currentTimeMillis() - now);
+				if(null != session) {
+					sessionAge.increment(session.getAge());
+					stopMean.increment(System.currentTimeMillis() - now);
+				} else {
+					System.err.println("STOP error getting " + sessionId);
+				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
