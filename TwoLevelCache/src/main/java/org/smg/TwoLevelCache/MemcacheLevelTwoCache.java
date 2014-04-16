@@ -64,14 +64,14 @@ public class MemcacheLevelTwoCache<T> implements LevelTwoCache<T> {
 		try {
 			OperationFuture<Boolean> set = c.set(key, 2592000, builder.build(o));
 			// Make put synchronous
-			Boolean status = set.get();
+			Boolean status = true; // set.get();
 			if(status) {
 				index.add(key);
 				size++;
 			} else {
 				System.out.println("Problem adding session for " + key);
 			}
-		} catch (IOException | InterruptedException | ExecutionException e) {
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new InvalidObjectException(e.getMessage());
