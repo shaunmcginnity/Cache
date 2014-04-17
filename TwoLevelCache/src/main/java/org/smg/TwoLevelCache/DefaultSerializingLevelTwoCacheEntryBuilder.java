@@ -22,6 +22,7 @@ public class DefaultSerializingLevelTwoCacheEntryBuilder<T> implements LevelTwoC
 	/* (non-Javadoc)
 	 * @see org.smg.TwoLevelCache.LevelTwoCacheEntryBuilder#retrieve(byte[])
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public T retrieve(byte[] byteArray) throws IOException, ClassNotFoundException {
 		ByteArrayInputStream bis = new ByteArrayInputStream(byteArray);

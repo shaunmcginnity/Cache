@@ -2,7 +2,6 @@ package org.smg.TwoLevelCache;
 
 import java.io.IOException;
 import java.io.InvalidObjectException;
-import java.util.Map;
 
 import org.mapdb.BTreeMap;
 import org.mapdb.DB;
