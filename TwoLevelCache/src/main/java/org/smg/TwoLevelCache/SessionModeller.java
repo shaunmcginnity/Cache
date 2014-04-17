@@ -1,5 +1,6 @@
 package org.smg.TwoLevelCache;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -37,8 +38,10 @@ public class SessionModeller
     final Random r = new Random();
 	private final int meanSessionAge;
 	private final int sessionInitiationPeriod;
+	private StringPool stringPool;
 
-	SessionModeller(int l2CacheType, int l1CacheSize, int sessionAge, int sessionInitiationPeriod) {
+	SessionModeller(StringPool stringPool, int l2CacheType, int l1CacheSize, int sessionAge, int sessionInitiationPeriod) {
+		this.stringPool = stringPool;
 		l2Cache = LevelTwoCacheBuilder.build(l2CacheType, l2Builder);
 		cache = new LevelOneCache<>(l1CacheSize, l2Cache, EvictionOrder.ACCESS);
 		this.meanSessionAge = sessionAge;
@@ -46,6 +49,10 @@ public class SessionModeller
 		System.out.println(String.format("Using \nL1 Cache size : %d\nL2 Cache : %s\nMean session age : %d\nSession initiation period : %d\n", l1CacheSize, l2Cache.getClass().getName(), this.meanSessionAge, this.sessionInitiationPeriod));
 	}
 
+	private StringPool getStringPool() {
+		return stringPool;
+	}
+	
 	private final class SessionStop implements Runnable {
 		private final String sessionId;
 		private final SessionModeller sessionModeller;
@@ -119,7 +126,8 @@ public class SessionModeller
 		private final ScheduledThreadPoolExecutor e;
 		private final SessionModeller sessionModeller;
 		private final Random r;
-
+		private long started = 0;
+		
 		private SessionInitiator(SessionModeller sessionModeller, ScheduledThreadPoolExecutor e, Random r) {
 			this.e = e;
 			this.sessionModeller = sessionModeller;
@@ -128,37 +136,50 @@ public class SessionModeller
 
 		@Override
 		public void run() {
-			Session s = new Session(r.nextLong(), System.currentTimeMillis());
+			if(started > 850000) {
+				return;
+			}
+			String id = Long.toString(r.nextLong());
+			Session s = new Session(id, System.currentTimeMillis());
 			addInitialSessionAttributes(s);
 			//System.out.println("START " + s.getId());
 			long now = System.currentTimeMillis();
-			sessionModeller.cache.put(Long.toString(s.getId()), s);
+			sessionModeller.cache.put(id, s);
 			long delta = System.currentTimeMillis() - now;
 			startMean.increment(delta);
+
+			started++;
+
 			if(r.nextInt(100) < 70) {
 				e.schedule(new DataStart(sessionModeller,
-						Long.toString(s.getId()),
+						id,
 						dataStartAttributes()),
 						5,
 						TimeUnit.MILLISECONDS);
 			}
-			e.schedule(new SessionStop(sessionModeller,
-					Long.toString(s.getId())),
-					meanSessionAge,
-					TimeUnit.SECONDS);
+
+			if(started < 100000) {
+				e.schedule(new SessionStop(sessionModeller, id),
+						meanSessionAge,
+						TimeUnit.SECONDS);
+			}
 		}
 
 		private HashMap<String,Object> dataStartAttributes() {
 			HashMap<String, Object> attributes = new HashMap<String, Object>();
+			StringPool sessionKeys = sessionModeller.getStringPool();
 			for(int i=0; i<10; i++) {
-				attributes.put("dataStartAttr" + i, r.nextInt() + "value");
+				attributes.put(sessionKeys.getStringFor(r.nextInt(sessionKeys.getSize())),
+						       r.nextInt() + "value");
 			}
 			return attributes;
 		}
 
 		private void addInitialSessionAttributes(Session s) {
 			for(int i=0; i<10; i++) {
-				s.put("initAttr" + i, r.nextInt() + "value");
+				StringPool sessionKeys = sessionModeller.getStringPool();
+				int keyIndex = r.nextInt(sessionKeys.getSize());
+				s.put(sessionKeys.getStringFor(keyIndex), r.nextInt() + "value");
 			}			
 		}
 	}
@@ -166,7 +187,18 @@ public class SessionModeller
 	public static void main(String[] args) {
 		System.out.println("Starting...");
 		
-		final SessionModeller sessionModeller = new SessionModeller(Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(args[3]));
+		StringPool stringPool = null;
+		int stringPoolType = Integer.parseInt(args[4]);
+		if(stringPoolType == 0) {
+			stringPool = new ArrayBackedStringPool("attribute", 400, false);
+		} else if(stringPoolType == 1){
+			stringPool = new ArrayBackedStringPool("attribute", 400, true);
+		} else if(stringPoolType == 2){
+			stringPool = new NonPoolingStringPool("attribute", 400, false);
+		} else if(stringPoolType == 3){
+			stringPool = new NonPoolingStringPool("attribute", 400, true);
+		}
+		final SessionModeller sessionModeller = new SessionModeller(stringPool, Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(args[3]));
 		
         sessionModeller.startSessions();
     }

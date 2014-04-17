@@ -6,21 +6,21 @@ import java.util.HashMap;
 @SuppressWarnings("serial")
 public class Session implements Serializable {
 
-	private long id;
+	private String id;
 	private long startTime;
 	private HashMap<String, Object> attributes = new HashMap<> ();
 	
 	public Session() {
-		id = 0;
+		id = "";
 		startTime = 0;
 	}
 	
-	public Session(long id, long startTime) {
+	public Session(String id, long startTime) {
 		this.id = id;
 		this.startTime = startTime;
 	}
 
-	public long getId() {
+	public String getId() {
 		return id;
 	}
 	
@@ -30,11 +30,6 @@ public class Session implements Serializable {
 
 	public void setStartTime(long startTime) {
 		this.startTime = startTime;
-	}
-
-	public void setId(long id) {
-		System.out.println("setId()");
-		this.id = id;
 	}
 
 	public long getAge() {
