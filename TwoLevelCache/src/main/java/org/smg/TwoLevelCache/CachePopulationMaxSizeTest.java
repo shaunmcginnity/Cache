@@ -1,14 +1,15 @@
 package org.smg.TwoLevelCache;
 
-import java.util.HashMap;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Random;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.math.stat.descriptive.moment.Mean;
 import org.smg.TwoLevelCache.LevelOneCache.EvictionOrder;
 
-public class CachePopulationLoadTest 
+public class CachePopulationMaxSizeTest 
 {
 	private final LevelTwoCacheEntryBuilder<Session> l2Builder = new KryoSerializingSessionEntryBuilder2();
 	private final LevelTwoCache<Session> l2Cache;
@@ -22,7 +23,7 @@ public class CachePopulationLoadTest
 	private final int sessionInitiationPeriod;
 	private StringPool sessionKeysStringPool;
 
-	CachePopulationLoadTest(StringPool sessionKeysStringPool, int l2CacheType, int l1CacheSize, int sessionAge, int sessionInitiationPeriod) {
+	CachePopulationMaxSizeTest(StringPool sessionKeysStringPool, int l2CacheType, int l1CacheSize, int sessionAge, int sessionInitiationPeriod) {
 		this.sessionKeysStringPool = sessionKeysStringPool;
 		l2Cache = LevelTwoCacheFactory.build(l2CacheType, l2Builder);
 		cache = new LevelOneCache<>(l1CacheSize, l2Cache, EvictionOrder.ACCESS);
@@ -76,7 +77,7 @@ public class CachePopulationLoadTest
 		SessionAttributesBuilder sessionAttributesBuilder = new SessionAttributesBuilder(sessionKeysStringPool);
 		Runtime runtime = Runtime.getRuntime();
 		for(int test=0; test<10; test++) {
-			final CachePopulationLoadTest cachePopulationLoadTest = new CachePopulationLoadTest(sessionKeysStringPool, Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(args[3]));
+			final CachePopulationMaxSizeTest cachePopulationLoadTest = new CachePopulationMaxSizeTest(sessionKeysStringPool, Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(args[3]));
 		
 			cachePopulationLoadTest.run(sessionAttributesBuilder);
 			System.out.println(runtime.freeMemory() + " " + runtime.totalMemory() + " " + runtime.maxMemory());
@@ -85,10 +86,21 @@ public class CachePopulationLoadTest
 
 	private void run(SessionAttributesBuilder sessionAttributesBuilder) throws InterruptedException {
 		long start = System.currentTimeMillis();
-		for(int i=0; i<1000000; i++) {
-			String id = "session" + i;
-			Session s = new Session(id, 0, sessionAttributesBuilder.dataStartAttributes());
-			cache.put(id, s);
+		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		try {
+			for(long i=0; i<1000000000l; i++) {
+				if(i%100000 == 0) {
+					System.out.println(dateFormat.format(Calendar.getInstance().getTime()) + " Adding : " + i);
+				}
+				String id = "session" + i;
+				Session s = new Session(id, 0, sessionAttributesBuilder.dataStartAttributes());
+				cache.put(id, s);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.err.println(cache.size());
+			System.exit(1);
 		}
 		long end = System.currentTimeMillis();
 		System.out.println(end - start);
