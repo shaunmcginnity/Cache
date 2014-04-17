@@ -24,7 +24,7 @@ public class NonPoolingStringPool implements StringPool {
 	public String getStringFor(int index) {
 		String string = prefix + r.nextInt(size);
 		if(intern) {
-			string.intern();
+			string = string.intern();
 		}
 		return string;
 	}

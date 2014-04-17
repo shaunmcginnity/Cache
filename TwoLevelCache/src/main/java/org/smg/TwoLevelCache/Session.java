@@ -11,13 +11,16 @@ public class Session implements Serializable {
 	private HashMap<String, Object> attributes = new HashMap<> ();
 	
 	public Session() {
-		id = "";
-		startTime = 0;
+		this.id = "";
+		this.startTime = 0;
 	}
 	
-	public Session(String id, long startTime) {
+	public Session(String id, long startTime, HashMap<String, Object> attributes) {
 		this.id = id;
 		this.startTime = startTime;
+		if(null != attributes) {
+			this.attributes.putAll(attributes);
+		}
 	}
 
 	public String getId() {

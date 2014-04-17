@@ -6,7 +6,7 @@ import java.util.Random;
 public class SerializingTest {
 	public static void main(String [] args) throws IOException, ClassNotFoundException {
 		Random r = new Random();
-		Session s = new Session("1234567", 98768l);
+		Session s = new Session("1234567", 98768l, null);
 		for(int i=0; i<20; i++) {
 			s.put("dataStartAttr" + i, r.nextInt() + "value");
 		}

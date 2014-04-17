@@ -14,7 +14,7 @@ public class ArrayBackedStringPool implements StringPool {
 		for(int i=0; i<size; i++) {
 			String key = prefix + r.nextInt(10000);
 			if(intern) {
-				key.intern();
+				key = key.intern();
 			}
 			sessionKeys.add(key);
 		}

@@ -44,7 +44,7 @@ public class LevelTwoCacheTest {
 	public void testSessionSerialization() throws IOException, ClassNotFoundException {
 		KryoSerializingLevelTwoCacheEntryBuilder<Session> levelTwoBuilder = new KryoSerializingLevelTwoCacheEntryBuilder<>();
 		
-		Session session = new Session("123456", 1000l);
+		Session session = new Session("123456", 1000l, null);
 		session.put("a", "b");
 		
 		byte[] serialized = levelTwoBuilder.build(session);
