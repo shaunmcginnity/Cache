@@ -86,8 +86,14 @@ public class CachePopulationLoadTest
 			Session s = new Session(id, 0, sessionAttributesBuilder.dataStartAttributes());
 			cache.put(id, s);
 		}
-		System.out.println(System.currentTimeMillis() - start);
+		long end = System.currentTimeMillis();
+		System.out.println(end - start);
 		Thread.sleep(10000);
+		for(int i=0; i<1000000; i++) {
+			String id = "session" + i;
+			cache.remove(id);
+		}
+		System.out.println(System.currentTimeMillis() - end);
 	}
 
 	public int getLevelOneCacheSize() {
