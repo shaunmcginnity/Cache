@@ -22,13 +22,16 @@ public class SerializingTest {
 	private static void testBuilder(Session s,
 			LevelTwoCacheEntryBuilder<Session> b) throws IOException,
 			ClassNotFoundException {
+		
 		for(int iter=0; iter<10; iter++) {
 			long start = System.currentTimeMillis();
+			long size = 0;
 			for(int i=0; i<50000; i++) {
 				byte [] bytes = b.build(s);
+				size += bytes.length;
 				Session out = b.retrieve(bytes);
 			}
-			System.out.println(System.currentTimeMillis() - start);
+			System.out.println(System.currentTimeMillis() - start + " " + size/50000);
 		}
 	}
 }

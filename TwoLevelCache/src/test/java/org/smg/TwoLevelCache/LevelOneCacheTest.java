@@ -10,7 +10,7 @@ public class LevelOneCacheTest {
 	@Test
 	public void testStoresEvictedEntriesInLevelTwoCache() {
 		DefaultSerializingLevelTwoCacheEntryBuilder<String> levelTwoBuilder = new DefaultSerializingLevelTwoCacheEntryBuilder<>();
-		LevelTwoCache<String> l2Cache = new InMemoryLevelTwoCache<>(levelTwoBuilder);
+		LevelTwoCache<String> l2Cache = new InMemoryLevelTwoCache<>(levelTwoBuilder, 100);
 		LevelOneCache<String> l1Cache = new LevelOneCache<>(5, l2Cache, EvictionOrder.ACCESS);
 		
 		for(int i=0; i<5; i++) {
@@ -25,7 +25,7 @@ public class LevelOneCacheTest {
 	@Test
 	public void testLeastRecentlyUsedEntryIsEvictedFirstToLevelTwoCache() {
 		DefaultSerializingLevelTwoCacheEntryBuilder<String> levelTwoBuilder = new DefaultSerializingLevelTwoCacheEntryBuilder<>();
-		LevelTwoCache<String> l2Cache = new InMemoryLevelTwoCache<>(levelTwoBuilder);
+		LevelTwoCache<String> l2Cache = new InMemoryLevelTwoCache<>(levelTwoBuilder,100);
 		LevelOneCache<String> l1Cache = new LevelOneCache<>(5, l2Cache, EvictionOrder.ACCESS);
 		
 		for(int i=0; i<5; i++) {
@@ -41,7 +41,7 @@ public class LevelOneCacheTest {
 	@Test
 	public void testRemovingAnItemIsAlsoRemovedFromLevelTwoCache() {
 		DefaultSerializingLevelTwoCacheEntryBuilder<String> levelTwoBuilder = new DefaultSerializingLevelTwoCacheEntryBuilder<>();
-		LevelTwoCache<String> l2Cache = new InMemoryLevelTwoCache<>(levelTwoBuilder);
+		LevelTwoCache<String> l2Cache = new InMemoryLevelTwoCache<>(levelTwoBuilder,100);
 		LevelOneCache<String> l1Cache = new LevelOneCache<>(5, l2Cache, EvictionOrder.ACCESS);
 
 		for(int i=0; i<5; i++) {
@@ -58,7 +58,7 @@ public class LevelOneCacheTest {
 	@Test
 	public void testUpdatingAnEvictedItemRemovesItFromLevelTwoCache() {
 		DefaultSerializingLevelTwoCacheEntryBuilder<String> levelTwoBuilder = new DefaultSerializingLevelTwoCacheEntryBuilder<>();
-		LevelTwoCache<String> l2Cache = new InMemoryLevelTwoCache<>(levelTwoBuilder);
+		LevelTwoCache<String> l2Cache = new InMemoryLevelTwoCache<>(levelTwoBuilder, 100);
 		LevelOneCache<String> l1Cache = new LevelOneCache<>(5, l2Cache, EvictionOrder.ACCESS);
 		
 		for(int i=0; i<5; i++) {

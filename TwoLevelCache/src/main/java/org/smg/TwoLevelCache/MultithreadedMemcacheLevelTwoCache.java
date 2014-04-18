@@ -3,21 +3,36 @@ package org.smg.TwoLevelCache;
 import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.util.TreeSet;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import net.spy.memcached.AddrUtil;
 import net.spy.memcached.BinaryConnectionFactory;
 import net.spy.memcached.MemcachedClient;
 import net.spy.memcached.internal.OperationFuture;
 
-public class MemcacheLevelTwoCache<T> implements LevelTwoCache<T> {
+public class MultithreadedMemcacheLevelTwoCache<T> implements LevelTwoCache<T> {
 
-	private LevelTwoCacheEntryBuilder<T> builder;
-	private MemcachedClient c;
+	private final class Entry {
+		public Entry(String key, byte[] bytes) {
+			this.key = key;
+			this.bytes = bytes;
+		}
+		public String key;
+		public byte[] bytes;
+	}
+	private final LevelTwoCacheEntryBuilder<T> builder;
 	private int size = 0;
 	private final TreeSet<String> index = new TreeSet<> ();
-	MemcacheLevelTwoCache(LevelTwoCacheEntryBuilder<T> builder) {
-		this.builder = builder;
+	private final BlockingQueue<Entry> queue = new ArrayBlockingQueue<>(1024);
+	private final ExecutorService threadPool = Executors.newFixedThreadPool(4);
+	private MemcachedClient c;
+	
+	MultithreadedMemcacheLevelTwoCache(final LevelTwoCacheEntryBuilder<T> l2builder) {
+		this.builder = l2builder;
 		try {
 			c = new MemcachedClient(
 					new BinaryConnectionFactory(),
@@ -27,16 +42,38 @@ public class MemcacheLevelTwoCache<T> implements LevelTwoCache<T> {
 			e.printStackTrace();
 			c = null;
 		}
+		for(int t=0; t<4; t++) {
+			threadPool.execute(new Runnable() {
 
-		try {
-			c.set("someKey", 3600, "Hello").get();
-			// Retrieve a value (synchronously).
-			Object myObject=c.get("someKey");
-			System.out.println("Got " + (String)myObject);
-		} catch (InterruptedException | ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+				@Override
+				public void run() {
+					MemcachedClient c;
+					try {
+						c = new MemcachedClient(
+								new BinaryConnectionFactory(),
+								AddrUtil.getAddresses("127.0.0.1:11211"));
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						c = null;
+					}
+					while(true) {
+						try {
+							Entry entry = queue.take();
+							c.set(entry.key, 2592000, entry.bytes);
+							index.add(entry.key);
+							size++;
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}
+				
+			});
+			
 		}
+
 	}
 	
 	@Override
@@ -61,21 +98,29 @@ public class MemcacheLevelTwoCache<T> implements LevelTwoCache<T> {
 
 	@Override
 	public void put(String key, T o) throws InvalidObjectException {
-		try {
-			OperationFuture<Boolean> set = c.set(key, 2592000, builder.build(o));
+//		try {
+			try {
+				queue.put(new Entry(key, builder.build(o)));
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			 catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			//OperationFuture<Boolean> set = c.set(key, 2592000, builder.build(o));
 			// Make put synchronous
 //			Boolean status = set.get();
 //			if(status) {
-				index.add(key);
-				size++;
 //			} else {
 //				System.out.println("Problem adding session for " + key);
 //			}
-		} catch (IOException e) { //| InterruptedException | ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			throw new InvalidObjectException(e.getMessage());
-		}
+//		} catch (IOException e) { //| InterruptedException | ExecutionException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//			throw new InvalidObjectException(e.getMessage());
+//		}
 	}
 
 	@Override

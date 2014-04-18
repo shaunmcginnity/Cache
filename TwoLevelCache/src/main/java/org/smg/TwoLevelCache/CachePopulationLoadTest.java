@@ -24,7 +24,7 @@ public class CachePopulationLoadTest
 
 	CachePopulationLoadTest(StringPool sessionKeysStringPool, int l2CacheType, int l1CacheSize, int sessionAge, int sessionInitiationPeriod) {
 		this.sessionKeysStringPool = sessionKeysStringPool;
-		l2Cache = LevelTwoCacheFactory.build(l2CacheType, l2Builder);
+		l2Cache = LevelTwoCacheFactory.build(l2CacheType, l2Builder, 1000);
 		cache = new LevelOneCache<>(l1CacheSize, l2Cache, EvictionOrder.ACCESS);
 		this.meanSessionAge = sessionAge;
 		this.sessionInitiationPeriod = sessionInitiationPeriod;
@@ -86,7 +86,7 @@ public class CachePopulationLoadTest
 	private void run(SessionAttributesBuilder sessionAttributesBuilder) throws InterruptedException {
 		long start = System.currentTimeMillis();
 		for(int i=0; i<1000000; i++) {
-			String id = "session" + i;
+			String id = "session" + r.nextInt();
 			Session s = new Session(id, 0, sessionAttributesBuilder.dataStartAttributes());
 			cache.put(id, s);
 		}

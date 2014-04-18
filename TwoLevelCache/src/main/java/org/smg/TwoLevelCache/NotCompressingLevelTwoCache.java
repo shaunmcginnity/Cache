@@ -6,7 +6,11 @@ import java.util.Map;
 
 public class NotCompressingLevelTwoCache<T> implements LevelTwoCache<T>{
 
-	private Map<String, T> map = new HashMap<> ();
+	private Map<String, T> map;
+	
+	public NotCompressingLevelTwoCache(int initialCapacity) {
+		map = new HashMap<>(initialCapacity);
+	}
 	
 	@Override
 	public T get(String key) {

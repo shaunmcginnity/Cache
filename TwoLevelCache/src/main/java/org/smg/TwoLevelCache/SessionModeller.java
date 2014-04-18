@@ -27,7 +27,7 @@ final class SessionInitiator implements Runnable {
 
 	@Override
 	public void run() {
-		if(started > 1000000) {
+		if(started > 2500000) {
 			return;
 		}
 		final String id = Long.toString(r.nextLong());
@@ -50,7 +50,7 @@ final class SessionInitiator implements Runnable {
 			}, 5, TimeUnit.MILLISECONDS);
 		}
 
-		if(started < 100000) {
+		if(started < 500000) {
 			e.schedule(new Runnable() {
 				@Override
 				public void run() {
@@ -99,10 +99,11 @@ public class SessionModeller
     private final int meanSessionAge;
 	private final int sessionInitiationPeriod;
 	private final SessionAttributesBuilder sessionAttributesBuilder;
+	private static final int sInitialL2CacheCapacity = 1500000;
 
 	SessionModeller(SessionAttributesBuilder sessionAttributesBuilder, int l2CacheType, int l1CacheSize, int sessionAge, int sessionInitiationPeriod) {
 		this.sessionAttributesBuilder = sessionAttributesBuilder;
-		l2Cache = LevelTwoCacheFactory.build(l2CacheType, l2Builder);
+		l2Cache = LevelTwoCacheFactory.build(l2CacheType, l2Builder, sInitialL2CacheCapacity );
 		cache = new LevelOneCache<>(l1CacheSize, l2Cache, EvictionOrder.ACCESS);
 		this.meanSessionAge = sessionAge;
 		this.sessionInitiationPeriod = sessionInitiationPeriod;

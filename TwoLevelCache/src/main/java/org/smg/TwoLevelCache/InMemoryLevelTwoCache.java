@@ -5,11 +5,12 @@ import java.io.InvalidObjectException;
 import java.util.HashMap;
 
 public class InMemoryLevelTwoCache<T> implements LevelTwoCache<T> {
-	private final HashMap<String, byte[]> map = new HashMap<> ();
+	private final HashMap<String, byte[]> map;
 	private final LevelTwoCacheEntryBuilder<T> builder;
 	
-	InMemoryLevelTwoCache(LevelTwoCacheEntryBuilder<T> builder) {
+	InMemoryLevelTwoCache(LevelTwoCacheEntryBuilder<T> builder, int initialCapacity) {
 		this.builder = builder;
+		map = new HashMap<> (initialCapacity);
 	}
 	
 	/* (non-Javadoc)

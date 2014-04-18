@@ -25,7 +25,7 @@ public class CachePopulationMaxSizeTest
 
 	CachePopulationMaxSizeTest(StringPool sessionKeysStringPool, int l2CacheType, int l1CacheSize, int sessionAge, int sessionInitiationPeriod) {
 		this.sessionKeysStringPool = sessionKeysStringPool;
-		l2Cache = LevelTwoCacheFactory.build(l2CacheType, l2Builder);
+		l2Cache = LevelTwoCacheFactory.build(l2CacheType, l2Builder, 100000);
 		cache = new LevelOneCache<>(l1CacheSize, l2Cache, EvictionOrder.ACCESS);
 		this.meanSessionAge = sessionAge;
 		this.sessionInitiationPeriod = sessionInitiationPeriod;

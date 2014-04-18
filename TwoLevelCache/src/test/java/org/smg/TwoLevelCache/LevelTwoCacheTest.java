@@ -12,7 +12,7 @@ public class LevelTwoCacheTest {
 	@Test
 	public void addingAnObjectWriteSerializedObjectToMap() throws InvalidObjectException {
 		DefaultSerializingLevelTwoCacheEntryBuilder<HashMap<String,String>> levelTwoBuilder = new DefaultSerializingLevelTwoCacheEntryBuilder<>();
-		LevelTwoCache<HashMap<String,String>> l2Cache = new InMemoryLevelTwoCache<>(levelTwoBuilder);
+		LevelTwoCache<HashMap<String,String>> l2Cache = new InMemoryLevelTwoCache<>(levelTwoBuilder, 100);
 		
 		HashMap<String,String> map = new HashMap<> ();
 		map.put("a", "v");
