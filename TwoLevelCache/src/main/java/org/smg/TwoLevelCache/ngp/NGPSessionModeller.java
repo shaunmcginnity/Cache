@@ -6,13 +6,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import org.smg.TwoLevelCache.InMemoryLevelTwoCache;
+import org.smg.TwoLevelCache.LevelOneCache;
+import org.smg.TwoLevelCache.LevelOneCache.EvictionOrder;
+import org.smg.TwoLevelCache.LevelTwoCache;
+import org.smg.TwoLevelCache.LevelTwoCacheEntryBuilder;
 
 import com.openwave.policy.AttributeValuePair;
 import com.openwave.policy.AttributeValuePair.Type;
 import com.openwave.policy.Policy;
 import com.openwave.policy.Rule;
 import com.openwave.policy.Rule.RuleType;
-import com.openwave.sessionmanager.cache.Session;
 import com.openwave.sessionmanager.cache.SessionCacheImpl;
 import com.openwave.sessionmanager.cache.SessionImpl;
 import com.openwave.sessionmanager.cache.radius.CustomAttribute;
@@ -23,12 +30,26 @@ import com.openwave.sessionmanager.cache.radius.IdentityImpl;
 public class NGPSessionModeller {
 	public static void main(String [] args) throws UnknownHostException {
 		SessionCacheImpl sessionCache = new SessionCacheImpl();
-		
+	    final ScheduledThreadPoolExecutor e = new ScheduledThreadPoolExecutor(1);
 		Random r = new Random();
+		LevelTwoCacheEntryBuilder<SessionImpl> l2Builder = new KryoSerializingSessionImplEntryBuilder();
+		final LevelTwoCache<SessionImpl> levelTwoCache = new InMemoryLevelTwoCache<SessionImpl>(l2Builder, 1500000);
+		final LevelOneCache<SessionImpl> levelOneCache = new LevelOneCache<SessionImpl>(50000, levelTwoCache, EvictionOrder.ACCESS);
+
+        e.scheduleAtFixedRate(new Runnable() {
+
+			@Override
+			public void run() {
+				System.out.println(levelOneCache.size() + " " + levelTwoCache.size());
+			}
+        	
+        }, 10000, 10000, TimeUnit.MILLISECONDS);
+		
+
 		
 		for(int i=0; i<100000; i++) {
 			String ipAddress = "10.20." + r.nextInt(255) + "." + r.nextInt(255);
-			Session session = sessionCache.createSessionWithIP(ipAddress);
+			SessionImpl session = (SessionImpl) sessionCache.createSessionWithIP(ipAddress);
 			
 			String identity = "id-" + r.nextInt();
 			session.setIdentity(identity);
@@ -80,7 +101,7 @@ public class NGPSessionModeller {
 	
 			session.setSubscriberAttributes(attributes );
 			
-			sessionCache.put(ipAddress, session);
+			levelOneCache.put(ipAddress, session);
 		}
 	}
 }

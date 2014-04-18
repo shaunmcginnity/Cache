@@ -96,6 +96,11 @@ public class SessionImpl extends DataDictionary implements Session {
 
     private boolean invalidPdpContext;
     
+    public SessionImpl() {
+    	
+    	this.cacheTTLInMillis = 0;
+    }
+    
     public SessionImpl(final long cacheTTLInMillis) {
         this.cacheTTLInMillis = cacheTTLInMillis;
     }
@@ -428,11 +433,6 @@ public class SessionImpl extends DataDictionary implements Session {
 
     @Override
     public Collection<Object> values() {
-        throw new UnsupportedOperationException("Method not allowed");
-    }
-
-    @Override
-    public Set<java.util.Map.Entry<String, Object>> entrySet() {
         throw new UnsupportedOperationException("Method not allowed");
     }
 

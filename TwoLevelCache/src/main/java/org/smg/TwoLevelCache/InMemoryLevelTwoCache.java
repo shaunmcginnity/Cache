@@ -8,7 +8,7 @@ public class InMemoryLevelTwoCache<T> implements LevelTwoCache<T> {
 	private final HashMap<String, byte[]> map;
 	private final LevelTwoCacheEntryBuilder<T> builder;
 	
-	InMemoryLevelTwoCache(LevelTwoCacheEntryBuilder<T> builder, int initialCapacity) {
+	public InMemoryLevelTwoCache(LevelTwoCacheEntryBuilder<T> builder, int initialCapacity) {
 		this.builder = builder;
 		map = new HashMap<> (initialCapacity);
 	}
