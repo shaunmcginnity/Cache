@@ -5,11 +5,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import org.smg.TwoLevelCache.LevelTwoCacheEntryBuilder;
+import org.smg.sessionmanager.cache.SessionImpl;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import com.openwave.sessionmanager.cache.SessionImpl;
 
 public class KryoSerializingSessionImplEntryBuilder implements LevelTwoCacheEntryBuilder<SessionImpl> {
 

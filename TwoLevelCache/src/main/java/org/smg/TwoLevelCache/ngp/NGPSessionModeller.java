@@ -14,18 +14,17 @@ import org.smg.TwoLevelCache.LevelOneCache;
 import org.smg.TwoLevelCache.LevelOneCache.EvictionOrder;
 import org.smg.TwoLevelCache.LevelTwoCache;
 import org.smg.TwoLevelCache.LevelTwoCacheEntryBuilder;
-
-import com.openwave.policy.AttributeValuePair;
-import com.openwave.policy.AttributeValuePair.Type;
-import com.openwave.policy.Policy;
-import com.openwave.policy.Rule;
-import com.openwave.policy.Rule.RuleType;
-import com.openwave.sessionmanager.cache.SessionCacheImpl;
-import com.openwave.sessionmanager.cache.SessionImpl;
-import com.openwave.sessionmanager.cache.radius.CustomAttribute;
-import com.openwave.sessionmanager.cache.radius.CustomDataType;
-import com.openwave.sessionmanager.cache.radius.Identity;
-import com.openwave.sessionmanager.cache.radius.IdentityImpl;
+import org.smg.policy.AttributeValuePair;
+import org.smg.policy.Policy;
+import org.smg.policy.Rule;
+import org.smg.policy.AttributeValuePair.Type;
+import org.smg.policy.Rule.RuleType;
+import org.smg.sessionmanager.cache.SessionCacheImpl;
+import org.smg.sessionmanager.cache.SessionImpl;
+import org.smg.sessionmanager.cache.radius.CustomAttribute;
+import org.smg.sessionmanager.cache.radius.CustomDataType;
+import org.smg.sessionmanager.cache.radius.Identity;
+import org.smg.sessionmanager.cache.radius.IdentityImpl;
 
 public class NGPSessionModeller {
 	public static void main(String [] args) throws UnknownHostException {
