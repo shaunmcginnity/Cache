@@ -29,4 +29,10 @@ public class ArrayBackedStringPool implements StringPool {
 		return sessionKeys.get(index);
 	}
 
+	@Override
+	public String getString() {
+		return null;
+	}
+
+	
 }

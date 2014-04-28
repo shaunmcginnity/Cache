@@ -9,7 +9,7 @@ public class NonPoolingStringPool implements StringPool {
 	private final Random r = new Random();
 	private boolean intern;
 	
-	NonPoolingStringPool(String prefix, int size, boolean intern) {
+	public NonPoolingStringPool(String prefix, int size, boolean intern) {
 		this.prefix = prefix;
 		this.size = size;
 		this.intern = intern;
@@ -28,5 +28,15 @@ public class NonPoolingStringPool implements StringPool {
 		}
 		return string;
 	}
+
+	@Override
+	public String getString() {
+		String string = prefix + r.nextInt(size);
+		if(intern) {
+			string = string.intern();
+		}
+		return string;
+	}
+
 
 }
